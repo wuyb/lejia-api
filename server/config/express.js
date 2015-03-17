@@ -28,6 +28,14 @@ module.exports = function(app) {
   app.use(methodOverride());
   app.use(cookieParser());
   app.use(passport.initialize());
+
+  app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+    next();
+  });
+
   if ('production' === env) {
     app.use(favicon(path.join(config.root, 'public', 'favicon.ico')));
     app.use(express.static(path.join(config.root, 'public')));
@@ -41,6 +49,7 @@ module.exports = function(app) {
     app.use(express.static(path.join(config.root, 'client')));
     app.set('appPath', 'client');
     app.use(morgan('dev'));
+
     app.use(errorHandler()); // Error handler - has to be last
   }
 };
