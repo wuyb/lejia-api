@@ -15,7 +15,7 @@ var validationError = function(res, err) {
  * restriction: 'admin'
  */
 exports.index = function(req, res) {
-  User.find({}, '-salt -hashedPassword').populate('roles').exec(function (err, users) {
+  User.find({}, '-salt -hashedPassword').populate('roles createdBy updatedBy').exec(function (err, users) {
     if(err) return res.send(500, err);
     res.json(200, users);
   });
@@ -33,6 +33,7 @@ exports.create = function (req, res, next) {
   var newUser = new User(req.body);
   newUser.provider = 'local';
   newUser.password = '123456';
+  newUser.createdBy = req.user._id;
   newUser.save(function(err, user) {
     console.log(JSON.stringify(err));
     if (err) return validationError(res, err);
@@ -57,6 +58,8 @@ exports.update = function (req, res, next) {
     req.body.roles = roles;
     user.roles = roles;
     user.email = req.body.email;
+    user.updatedBy = req.user._id;
+    user.updatedAt = Date.now();
     user.save(function(err) {
       if (err) return validationError(res, err);
       res.send(200);
