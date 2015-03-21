@@ -22,19 +22,47 @@ exports.index = function(req, res) {
 };
 
 /**
- * Creates a new user
+ * Creates a new user by admin.
  */
 exports.create = function (req, res, next) {
+  var roles = [];
+  for (var i in req.body.roles) {
+    roles.push(req.body.roles[i]._id);
+  }
+  req.body.roles = roles;
   var newUser = new User(req.body);
   newUser.provider = 'local';
-  newUser.role = 'user';
+  newUser.password = '123456';
   newUser.save(function(err, user) {
+    console.log(JSON.stringify(err));
     if (err) return validationError(res, err);
-    var token = jwt.sign({_id: user._id }, config.secrets.session, { expiresInMinutes: 60*5 });
-    res.json({ token: token });
+    res.json(user.profile);
+//    var token = jwt.sign({_id: user._id }, config.secrets.session, { expiresInMinutes: 60*5 });
+//    res.json({ token: token });
   });
 };
 
+
+/**
+ * Updates an existing user by admin.
+ */
+exports.update = function (req, res, next) {
+  User.findById(req.body._id, function(err, user) {
+    if (err) return validationError(res, err);
+    user.name = req.body.name;
+    var roles = [];
+    for (var i in req.body.roles) {
+      roles.push(req.body.roles[i]._id);
+    }
+    req.body.roles = roles;
+    user.roles = roles;
+    user.email = req.body.email;
+    user.save(function(err) {
+      if (err) return validationError(res, err);
+      res.send(200);
+    })
+  });
+};
 /**
  * Get a single user
  */
