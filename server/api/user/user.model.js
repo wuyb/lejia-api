@@ -3,17 +3,22 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var crypto = require('crypto');
+var Role = require('./role.model');
 
 var UserSchema = new Schema({
   name: String,
-  email: { type: String, lowercase: true },
-  role: {
-    type: String,
-    default: 'user'
-  },
+  email: { type: String, lowercase: true, unique: true },
+  roles: [{
+    type: Schema.ObjectId,
+    ref: 'Role'
+  }],
   hashedPassword: String,
   provider: String,
-  salt: String
+  salt: String,
+  createdBy: {type: Schema.ObjectId, ref: 'User'},
+  createdAt: {type: Date, required: true, default: Date.now},
+  updatedBy: {type: Schema.ObjectId, ref: 'User'},
+  updatedAt: {type: Date, default: Date.now}
 });
 
 /**
@@ -36,7 +41,7 @@ UserSchema
   .get(function() {
     return {
       'name': this.name,
-      'role': this.role
+      'roles': this.roles
     };
   });
 
@@ -46,7 +51,7 @@ UserSchema
   .get(function() {
     return {
       '_id': this._id,
-      'role': this.role
+      'roles': this.roles
     };
   });
 

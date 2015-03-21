@@ -25,7 +25,7 @@ function isAuthenticated() {
     })
     // Attach user to request
     .use(function(req, res, next) {
-      User.findById(req.user._id, function (err, user) {
+      User.findById(req.user._id).populate('roles').exec(function (err, user) {
         if (err) return next(err);
         if (!user) return res.send(401);
 
@@ -44,12 +44,13 @@ function hasRole(roleRequired) {
   return compose()
     .use(isAuthenticated())
     .use(function meetsRequirements(req, res, next) {
-      if (config.userRoles.indexOf(req.user.role) >= config.userRoles.indexOf(roleRequired)) {
-        next();
+      for (var i in req.user.roles) {
+        if (req.user.roles[i].value === roleRequired) {
+          next();
+          return;
+        }
       }
-      else {
-        res.send(403);
-      }
+      res.send(403);
     });
 }
 
@@ -65,7 +66,7 @@ function signToken(id) {
  */
 function setTokenCookie(req, res) {
   if (!req.user) return res.json(404, { message: 'Something went wrong, please try again.'});
-  var token = signToken(req.user._id, req.user.role);
+  var token = signToken(req.user._id, req.user.roles);
   res.cookie('token', JSON.stringify(token));
   res.redirect('/');
 }
