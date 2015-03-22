@@ -64,6 +64,9 @@ exports.create = function (req, res, next) {
 exports.update = function (req, res, next) {
   User.findById(req.body._id, function(err, user) {
     if (err) return validationError(res, err);
+    if (user.locked) {
+      return validationError(res, 'This account is locked.');
+    }
     user.name = req.body.name;
     user.roles = req.body.roles.map(function(r) {return r._id});
     user.email = req.body.email;
@@ -108,6 +111,9 @@ exports.changePassword = function(req, res, next) {
   var newPass = String(req.body.newPassword);
 
   User.findById(userId, function (err, user) {
+    if (user.locked) {
+      return validationError(res, 'This account is locked.');
+    }
     if(user.authenticate(oldPass)) {
       user.password = newPass;
       user.save(function(err) {

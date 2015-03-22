@@ -24,7 +24,8 @@ Role.find({}).remove(function() {
             roles: adminRole,
             name: 'Admin',
             email: 'admin@admin.com',
-            password: 'admin'
+            password: 'admin',
+            locked: true
           }, function() {
               console.log('finished populating users');
             }
