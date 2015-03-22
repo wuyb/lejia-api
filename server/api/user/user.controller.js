@@ -5,11 +5,22 @@ var Role = require('./role.model');
 var passport = require('passport');
 var config = require('../../config/environment');
 var jwt = require('jsonwebtoken');
+var mail = require('../../mail/mail.service');
+var crypto = require('crypto');
 
 var validationError = function(res, err) {
   return res.json(422, err);
 };
 
+var internalError = function(res, err) {
+  return res.json(500, err);
+}
+
+function randomValueBase64(len) {
+    return crypto.randomBytes(Math.ceil(len * 3 / 4))
+        .toString('base64')   // convert to base64 format
+        .slice(0, len);        // return required number of characters
+}
 /**
  * Get list of users
  * restriction: 'admin'
@@ -23,23 +34,25 @@ exports.index = function(req, res) {
 
 /**
  * Creates a new user by admin.
+ * The user's password will be generated randomly. It is sent to the user via email.
+ * Email sending failure is not a fatal error, so here the error will be logged but 200 will be sent back. 
  */
 exports.create = function (req, res, next) {
-  var roles = [];
-  for (var i in req.body.roles) {
-    roles.push(req.body.roles[i]._id);
-  }
-  req.body.roles = roles;
+  req.body.roles = req.body.roles.map(function(r) {return r._id});
+
   var newUser = new User(req.body);
   newUser.provider = 'local';
-  newUser.password = '123456';
+  newUser.password = randomValueBase64(8);
   newUser.createdBy = req.user._id;
   newUser.save(function(err, user) {
-    console.log(JSON.stringify(err));
-    if (err) return validationError(res, err);
-    res.json(user.profile);
-//    var token = jwt.sign({_id: user._id }, config.secrets.session, { expiresInMinutes: 60*5 });
-//    res.json({ token: token });
+    if (err) return internalError(res, err);
+    // send user his/her password
+    mail.sendUserCreatedEmail(user, function(error, info) {
+      if (error) {
+        console.log(JSON.stringify(error));
+      }
+      res.json(user.profile);
+    });
   });
 };
 
@@ -51,12 +64,7 @@ exports.update = function (req, res, next) {
   User.findById(req.body._id, function(err, user) {
     if (err) return validationError(res, err);
     user.name = req.body.name;
-    var roles = [];
-    for (var i in req.body.roles) {
-      roles.push(req.body.roles[i]._id);
-    }
-    req.body.roles = roles;
-    user.roles = roles;
+    user.roles = req.body.roles.map(function(r) {return r._id});
     user.email = req.body.email;
     user.updatedBy = req.user._id;
     user.updatedAt = Date.now();
