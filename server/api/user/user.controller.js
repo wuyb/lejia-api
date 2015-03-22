@@ -7,6 +7,7 @@ var config = require('../../config/environment');
 var jwt = require('jsonwebtoken');
 var mail = require('../../mail/mail.service');
 var crypto = require('crypto');
+var logger = require('../../logger/')
 
 var validationError = function(res, err) {
   return res.json(422, err);
@@ -49,7 +50,7 @@ exports.create = function (req, res, next) {
     // send user his/her password
     mail.sendUserCreatedEmail(user, function(error, info) {
       if (error) {
-        console.log(JSON.stringify(error));
+        logger.log('error', 'Failed to send email : %s', JSON.stringify(error));
       }
       res.json(user.profile);
     });

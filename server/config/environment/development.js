@@ -16,10 +16,26 @@ module.exports = {
       secure: true,
       debug: true,
       auth: {
-        user: 'yanbo.wu@qq.com',
+        user: 'yanbo.wu@qq.com1',
         pass: 'Katrina10)'
       }
     }
+  },
+
+  logger: {
+    console: true,
+    files: [
+      {
+        name: 'info',
+        filename: 'info.log',
+        level: 'info'
+      },
+      {
+        name: 'error',
+        filename: 'error.log',
+        level: 'error'
+      }
+    ]
   },
 
   seedDB: true
