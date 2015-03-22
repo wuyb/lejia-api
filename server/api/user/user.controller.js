@@ -45,6 +45,7 @@ exports.create = function (req, res, next) {
   newUser.provider = 'local';
   newUser.password = randomValueBase64(8);
   newUser.createdBy = req.user._id;
+  newUser.updatedBy = req.user._id;
   newUser.save(function(err, user) {
     if (err) return internalError(res, err);
     // send user his/her password
