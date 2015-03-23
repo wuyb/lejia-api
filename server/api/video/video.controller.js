@@ -2,6 +2,14 @@
 
 var _ = require('lodash');
 var Video = require('./video.model');
+var config = require('../../config/environment');
+var logger = require('../../logger/');
+
+var qiniu = require('qiniu');
+qiniu.conf.ACCESS_KEY = config.storage.qiniu.accessKey;
+qiniu.conf.SECRET_KEY = config.storage.qiniu.secretKey;
+
+var uptoken = new qiniu.rs.PutPolicy(config.storage.qiniu.bucket);
 
 // Get list of videos
 exports.index = function(req, res) {
@@ -59,6 +67,27 @@ exports.destroy = function(req, res) {
     });
   });
 };
+
+exports.uploadToken = function(req, res) {
+  var token = uptoken.token();
+  logger.log('info', 'Generated upload token: %s', token);
+  return res.json({uptoken: token});
+}
+
+exports.onFileUploaded = function(req, res) {
+  // TODO This is supposed to be a callback for qiniu upload.
+  //      Now we are simulating it by posting it directly from client side.
+  //      This must be fixed.
+  var key = req.query.name;
+  var hash = req.query.hash;
+  console.log('name=' + key);
+  console.log('hash=' + hash);
+  res.json({name: key, success: true});
+}
+
+exports.downloadToken = function(req, res) {
+  //
+}
 
 function handleError(res, err) {
   return res.send(500, err);

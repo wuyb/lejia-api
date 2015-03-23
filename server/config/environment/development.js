@@ -38,5 +38,14 @@ module.exports = {
     ]
   },
 
+  storage: {
+    type: 'qiniu',
+    qiniu : {
+      accessKey: 'dTP2hWUCOedt5LmxOKZj4ZgZnouQHxnTtMXxOAiD',
+      secretKey: '3jRNyETS0R9F6I1JfqUdz_yghYPZA3aioga1c_d4',
+      bucket: 'test19'
+    }
+  },
+
   seedDB: true
 };
