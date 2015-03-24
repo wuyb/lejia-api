@@ -19,7 +19,7 @@ function downloadUrl(key) {
 
 // Get list of videos
 exports.index = function(req, res) {
-  Video.find().populate('createdBy updatedBy tags').exec(function (err, videos) {
+  Video.find({'active': true}).populate('createdBy updatedBy tags').exec(function (err, videos) {
     if(err) { return handleError(res, err); }
     return res.json(200, videos);
   });
