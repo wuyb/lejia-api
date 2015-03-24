@@ -11,6 +11,12 @@ qiniu.conf.SECRET_KEY = config.storage.qiniu.secretKey;
 
 var uptoken = new qiniu.rs.PutPolicy(config.storage.qiniu.bucket);
 
+function downloadUrl(key) {
+  var baseUrl = qiniu.rs.makeBaseUrl(config.storage.qiniu.bucket + '.qiniudn.com', key);
+  var policy = new qiniu.rs.GetPolicy();
+  return policy.makeRequest(baseUrl);
+}
+
 // Get list of videos
 exports.index = function(req, res) {
   Video.find().populate('createdBy updatedBy tags').exec(function (err, videos) {
@@ -95,8 +101,10 @@ exports.onFileUploaded = function(req, res) {
   });
 }
 
-exports.downloadToken = function(req, res) {
-  //
+exports.getDownloadUrl = function(req, res) {
+  var url = downloadUrl(req.query.key);
+  logger.log('info', 'Generated download url : %s', url);
+  return res.json({url: url});
 }
 
 function handleError(res, err) {
