@@ -78,11 +78,21 @@ exports.onFileUploaded = function(req, res) {
   // TODO This is supposed to be a callback for qiniu upload.
   //      Now we are simulating it by posting it directly from client side.
   //      This must be fixed.
-  var key = req.query.name;
-  var hash = req.query.hash;
-  console.log('name=' + key);
-  console.log('hash=' + hash);
-  res.json({name: key, success: true});
+  var video = {
+    key: req.query.name,
+    hash: req.query.hash,
+    name: req.query.originalName,
+    size: req.query.size,
+    url: 'http://' + config.storage.qiniu.bucket + '.qiniudn.com/' + req.query.name,
+    createdBy: req.user._id,
+    updatedBy: req.user._id,
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  Video.create(video, function(err, video) {
+    if(err) { return handleError(res, err); }
+    return res.json({name: req.query.name, success: true});
+  });
 }
 
 exports.downloadToken = function(req, res) {
