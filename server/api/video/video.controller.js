@@ -4,6 +4,7 @@ var _ = require('lodash');
 var Video = require('./video.model');
 var config = require('../../config/environment');
 var logger = require('../../logger/');
+var auth = require('../../auth/auth.service');
 
 var qiniu = require('qiniu');
 qiniu.conf.ACCESS_KEY = config.storage.qiniu.accessKey;
@@ -36,12 +37,15 @@ exports.show = function(req, res) {
 
 // Updates an existing video in the DB.
 exports.update = function(req, res) {
-  if(req.body._id) { delete req.body._id; }
-  req.body.updatedBy = req.user;
-  req.body.updatedAt = Date.now();
   Video.findById(req.params.id, function (err, video) {
+    if (video.createdBy._id !== req.user._id && !auth.isAdmin(req.user)) {
+      return res.send(403, 'Forbidden');
+    }
     if (err) { return handleError(res, err); }
     if(!video) { return res.send(404); }
+    if(req.body._id) { delete req.body._id; }
+    req.body.updatedBy = req.user;
+    req.body.updatedAt = Date.now();
     var updated = _.merge(video, req.body);
     updated.save(function (err) {
       if (err) { return handleError(res, err); }
@@ -53,6 +57,9 @@ exports.update = function(req, res) {
 // Softly deletes a video from the DB.
 exports.destroy = function(req, res) {
   Video.findById(req.params.id, function (err, video) {
+    if (video.createdBy._id !== req.user._id && !auth.isAdmin(req.user)) {
+      return res.send(403, 'Forbidden');
+    }
     if(err) { return handleError(res, err); }
     if(!video) { return res.send(404); }
     var updated = _.merge(video, {active: false, updatedBy: req.user, updatedAt: Date.now()});

@@ -73,6 +73,15 @@ function hasOneOfRoles(rolesRequired) {
     });
 }
 
+function isAdmin(user) {
+  for (var i in user.roles) {
+    if (user.roles[i].value === 'admin') {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Returns a jwt token signed by the app secret
  */
@@ -95,3 +104,4 @@ exports.hasRole = hasRole;
 exports.hasOneOfRoles = hasOneOfRoles;
 exports.signToken = signToken;
 exports.setTokenCookie = setTokenCookie;
+exports.isAdmin = isAdmin;
