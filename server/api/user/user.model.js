@@ -16,6 +16,7 @@ var UserSchema = new Schema({
   provider: String,
   salt: String,
   locked: {type: Boolean, default: false},
+  active: {type: Boolean, default: true},
   createdBy: {type: Schema.ObjectId, ref: 'User'},
   createdAt: {type: Date, required: true, default: Date.now},
   updatedBy: {type: Schema.ObjectId, ref: 'User'},

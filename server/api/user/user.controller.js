@@ -27,7 +27,7 @@ function randomValueBase64(len) {
  * restriction: 'admin'
  */
 exports.index = function(req, res) {
-  User.find({}, '-salt -hashedPassword').populate('roles createdBy updatedBy').exec(function (err, users) {
+  User.find({active:true}, '-salt -hashedPassword').populate('roles createdBy updatedBy').exec(function (err, users) {
     if(err) return res.send(500, err);
     res.json(200, users);
   });
@@ -93,13 +93,17 @@ exports.show = function (req, res, next) {
 };
 
 /**
- * Deletes a user
+ * Deletes a user softly.
  * restriction: 'admin'
  */
 exports.destroy = function(req, res) {
-  User.findByIdAndRemove(req.params.id, function(err, user) {
-    if(err) return res.send(500, err);
-    return res.send(204);
+  User.findById(req.params.id, function(err, user) {
+    if (err) return validationError(res, err);
+    user.active = false;
+    user.save(function(err) {
+      if (err) return validationError(res, err);
+      res.send(200);
+    })
   });
 };
 

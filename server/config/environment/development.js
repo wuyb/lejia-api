@@ -11,13 +11,13 @@ module.exports = {
   // email options
   mail: {
     smtp: {
-      host: 'smtp.qq.com',
+      host: 'smtp.exmail.qq.com',
       port: 465,
       secure: true,
       debug: true,
       auth: {
-        user: 'yanbo.wu@qq.com1',
-        pass: 'Katrina10)'
+        user: 'no-reply@lejiakids.com',
+        pass: 'fortestnow9'
       }
     }
   },
