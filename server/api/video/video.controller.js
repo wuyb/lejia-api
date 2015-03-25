@@ -34,17 +34,6 @@ exports.show = function(req, res) {
   });
 };
 
-// Creates a new video in the DB.
-exports.create = function(req, res) {
-  req.body.createdBy = req.user;
-  req.body.createdAt = Date.now();
-  req.body.updatedBy = req.user;
-  Video.create(req.body, function(err, video) {
-    if(err) { return handleError(res, err); }
-    return res.json(201, video);
-  });
-};
-
 // Updates an existing video in the DB.
 exports.update = function(req, res) {
   if(req.body._id) { delete req.body._id; }

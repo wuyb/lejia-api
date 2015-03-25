@@ -18,7 +18,6 @@ if (config.storage.type === 'qiniu') {
   console.log("Qiniu Registered");
 }
 router.get('/:id', auth.hasOneOfRoles(['admin', 'editor']), controller.show);
-router.post('/', auth.hasOneOfRoles(['admin', 'editor']), controller.create);
 router.put('/:id', auth.hasOneOfRoles(['admin', 'editor']), controller.update);
 router.patch('/:id', auth.hasOneOfRoles(['admin', 'editor']), controller.update);
 router.delete('/:id', auth.hasOneOfRoles(['admin', 'editor']), controller.destroy);
