@@ -55,6 +55,25 @@ function hasRole(roleRequired) {
 }
 
 /**
+ * Checks if the user role meets the minimum requirements of the route
+ */
+function hasOneOfRoles(rolesRequired) {
+  if (!rolesRequired || rolesRequired.length === 0) throw new Error('Required roles needs to be set');
+
+  return compose()
+    .use(isAuthenticated())
+    .use(function meetsRequirements(req, res, next) {
+      for (var i in req.user.roles) {
+        if (rolesRequired.indexOf(req.user.roles[i].value)) {
+          next();
+          return;
+        }
+      }
+      res.send(403);
+    });
+}
+
+/**
  * Returns a jwt token signed by the app secret
  */
 function signToken(id) {
@@ -73,5 +92,6 @@ function setTokenCookie(req, res) {
 
 exports.isAuthenticated = isAuthenticated;
 exports.hasRole = hasRole;
+exports.hasOneOfRoles = hasOneOfRoles;
 exports.signToken = signToken;
 exports.setTokenCookie = setTokenCookie;
