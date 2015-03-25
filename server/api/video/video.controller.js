@@ -37,12 +37,12 @@ exports.show = function(req, res) {
 
 // Updates an existing video in the DB.
 exports.update = function(req, res) {
-  Video.findById(req.params.id, function (err, video) {
-    if (video.createdBy._id !== req.user._id && !auth.isAdmin(req.user)) {
-      return res.send(403, 'Forbidden');
-    }
+  Video.findById(req.params.id).populate('createdBy').exec(function (err, video) {
     if (err) { return handleError(res, err); }
     if(!video) { return res.send(404); }
+    if (video.createdBy._id.toString() !== req.user._id && !auth.isAdmin(req.user)) {
+      return res.send(403, 'Forbidden');
+    }
     if(req.body._id) { delete req.body._id; }
     req.body.updatedBy = req.user;
     req.body.updatedAt = Date.now();
@@ -56,12 +56,12 @@ exports.update = function(req, res) {
 
 // Softly deletes a video from the DB.
 exports.destroy = function(req, res) {
-  Video.findById(req.params.id, function (err, video) {
-    if (video.createdBy._id !== req.user._id && !auth.isAdmin(req.user)) {
-      return res.send(403, 'Forbidden');
-    }
+  Video.findById(req.params.id).populate('createdBy').exec(function (err, video) {
     if(err) { return handleError(res, err); }
     if(!video) { return res.send(404); }
+    if (video.createdBy._id.toString() != req.user._id && !auth.isAdmin(req.user)) {
+      return res.send(403, 'Forbidden');
+    }
     var updated = _.merge(video, {active: false, updatedBy: req.user, updatedAt: Date.now()});
     updated.save(function (err) {
       if (err) { return handleError(res, err); }
