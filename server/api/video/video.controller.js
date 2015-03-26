@@ -2,6 +2,7 @@
 
 var _ = require('lodash');
 var Video = require('./video.model');
+var Category = require('./category.model');
 var config = require('../../config/environment');
 var logger = require('../../logger/');
 var auth = require('../../auth/auth.service');
@@ -16,6 +17,16 @@ function downloadUrl(key) {
   var baseUrl = qiniu.rs.makeBaseUrl(config.storage.qiniu.bucket + '.qiniudn.com', key);
   var policy = new qiniu.rs.GetPolicy();
   return policy.makeRequest(baseUrl);
+}
+
+// Get list of video categories
+exports.categories = function(req, res) {
+  Category.find({}, function(err, categories) {
+    if (err) {
+      return handleError(res, err);
+    }
+    return res.json(200, categories);
+  });
 }
 
 // Get list of videos

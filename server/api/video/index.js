@@ -8,6 +8,7 @@ var config = require('../../config/environment');
 var router = express.Router();
 
 router.get('/', auth.hasOneOfRoles(['admin', 'editor']), controller.index);
+router.get('/categories', auth.hasOneOfRoles(['admin', 'editor']), controller.categories);
 
 // TODO moves this to storage/index.js and add generic storage.configure to eliminate the tight coupling
 //      refer to auth/index.js and sub-folders for an example
