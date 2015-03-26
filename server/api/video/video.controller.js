@@ -31,10 +31,33 @@ exports.categories = function(req, res) {
 
 // Get list of videos
 exports.index = function(req, res) {
-  Video.find({'active': true}).populate('createdBy updatedBy tags').exec(function (err, videos) {
-    if(err) { return handleError(res, err); }
-    return res.json(200, videos);
-  });
+  var categoryName = req.query.category;
+  if (categoryName) {
+    if (categoryName === 'none') {
+      Video.find({'categories': [], 'active':true}).populate('createdBy updatedBy tags').exec(function(err, videos) {
+        if(err) { return handleError(res, err); }
+        return res.json(200, videos);
+      });
+    } else {
+      Category.find({value: categoryName}, function(err, category) {
+        if (err) {
+          return handleError(res, err);
+        }
+        if (!category) {
+          return res.send(404);
+        }
+        Video.find({'categores': [category._id], 'active':true}).populate('createdBy updatedBy tags').exec(function(err, videos) {
+          if(err) { return handleError(res, err); }
+          return res.json(200, videos);
+        });
+      });
+    }
+  } else {
+    Video.find({'active': true}).populate('createdBy updatedBy tags').exec(function (err, videos) {
+      if(err) { return handleError(res, err); }
+      return res.json(200, videos);
+    });
+  }
 };
 
 // Get a single video
