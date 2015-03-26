@@ -8,6 +8,15 @@
 
 'use strict';
 
+// Set default node environment to development
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
+var config = require('./environment');
+var mongoose = require('mongoose');
+
+// Connect to database
+mongoose.connect(config.mongo.uri, config.mongo.options);
+
 var Role = require('../api/user/role.model');
 
 Role.find({}).remove(function() {
@@ -17,8 +26,12 @@ Role.find({}).remove(function() {
     {name:'论坛管理员',value:'moderator'},
     {name:'超级管理员',value:'admin'},
     {name:'普通用户',value:'user'},
-    function(){
+    function(err){
+      if (err) {
+        console.log("failed to populate roles : " + JSON.stringify(err));
+      }
       console.log('finished populating roles');
+      mongoose.disconnect();
     });
 
 });
