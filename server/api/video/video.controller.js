@@ -34,26 +34,26 @@ exports.index = function(req, res) {
   var categoryName = req.query.category;
   if (categoryName) {
     if (categoryName === 'none') {
-      Video.find({'categories': [], 'active':true}).populate('createdBy updatedBy tags').exec(function(err, videos) {
+      Video.find({'category': {$exists: false}, 'active':true}).populate('createdBy updatedBy tags category').exec(function(err, videos) {
         if(err) { return handleError(res, err); }
         return res.json(200, videos);
       });
     } else {
-      Category.find({value: categoryName}, function(err, category) {
+      Category.findOne({'value': categoryName}, function(err, category) {
         if (err) {
           return handleError(res, err);
         }
         if (!category) {
           return res.send(404);
         }
-        Video.find({'categores': [category._id], 'active':true}).populate('createdBy updatedBy tags').exec(function(err, videos) {
+        Video.find({'category': {$exists: true, $eq: category._id}, 'active':true}).populate('createdBy updatedBy tags category').exec(function(err, videos) {
           if(err) { return handleError(res, err); }
           return res.json(200, videos);
         });
       });
     }
   } else {
-    Video.find({'active': true}).populate('createdBy updatedBy tags').exec(function (err, videos) {
+    Video.find({'active': true}).populate('createdBy updatedBy tags category').exec(function (err, videos) {
       if(err) { return handleError(res, err); }
       return res.json(200, videos);
     });
@@ -62,7 +62,7 @@ exports.index = function(req, res) {
 
 // Get a single video
 exports.show = function(req, res) {
-  Video.findById(req.params.id).populate('createdBy updatedBy tags').exec(function (err, video) {
+  Video.findById(req.params.id).populate('createdBy updatedBy tags category').exec(function (err, video) {
     if(err) { return handleError(res, err); }
     if(!video) { return res.send(404); }
     return res.json(video);
@@ -80,6 +80,7 @@ exports.update = function(req, res) {
     if(req.body._id) { delete req.body._id; }
     req.body.updatedBy = req.user;
     req.body.updatedAt = Date.now();
+    req.body.category = req.body.category._id;
     var updated = _.merge(video, req.body);
     updated.save(function (err) {
       if (err) { return handleError(res, err); }

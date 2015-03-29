@@ -10,7 +10,7 @@ var VideoSchema = new Schema({
   hash: {type: String, required: true},
   url: {type: String, require: true},
   description: {type: String},
-  categories: [{type:Schema.Types.ObjectId, ref: 'Category'}],
+  category: {type:Schema.Types.ObjectId, ref: 'Category'},
   tags: [{type: Schema.Types.ObjectId, ref: 'Tag'}],
   active: {type: Boolean, default: true},
   createdBy: {type: Schema.ObjectId, ref: 'User', required: true},
